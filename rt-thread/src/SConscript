@@ -1,0 +1,11 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+src=Glob('*.c')
+
+CPPPATH = [RTT_ROOT + '/include']
+LINKFLAGS = ''
+group = DefineGroup('Kernel', src, depend=[''], CPPPATH=CPPPATH, LINKFLAGS=LINKFLAGS)
+
+Return('group')

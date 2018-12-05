@@ -1,0 +1,14 @@
+config ARCH_ARM
+    bool
+    
+
+config ARCH_ARM_CORTEX_A
+    bool
+    select ARCH_ARM
+    
+    
+config ARCH_ARM_CORTEX_A9
+    bool 
+    select ARCH_ARM_CORTEX_A
+    
+    

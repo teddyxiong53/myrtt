@@ -1,0 +1,198 @@
+menu "rt-thread kernel"
+
+config RT_NAME_MAX
+    int "the max size of kernel object name"
+    range 2 32
+    default 8
+    help    
+        name max size
+        
+config RT_ALIGN_SIZE
+	int "align size for cpu arch data access"
+	default 4
+	help 
+		align size 
+		
+	choice 
+		prompt "the max level value of priority of thread"
+		default RT_THREAD_PRIORITY_32
+		
+		config RT_THREAD_PRIORITY_8
+			bool "8"
+			
+		config RT_THREAD_PRIORITY_32
+			bool "32"
+			
+		config RT_THREAD_PRIORITY_256
+			bool "256"
+			
+	endchoice
+	
+config RT_THREAD_PRIORITY_MAX
+	int
+	default 8 if RT_THREAD_PRIORITY_8
+	default 32 if RT_THREAD_PRIORITY_32
+	default 256 if RT_THREAD_PRIORITY_256
+	
+config RT_TICK_PER_SECOND
+	int "tick freq, hz"
+	range 10 1000
+	default 100
+	help
+		system tick freq
+		
+config RT_DEBUG
+	bool "enable debug interface"
+	default y
+	
+if RT_DEBUG	
+config RT_USING_OVERFLOW_CHECK
+	bool "using stack overflow check"
+	default y
+	help
+		enable thread stack check.
+		
+config RT_DEBUG_INIT
+	int "enable system init info print"
+	default 0
+	help
+		print the init info 
+		
+config RT_DEBUG_THREAD
+	int "enable thread switch info dump"
+	default 0
+	help
+		print the switch info
+		
+endif
+
+config RT_USING_HOOK
+	bool "enable system hook"
+	default y
+	help
+		enable hook
+		
+config IDLE_THREAD_STACK_SIZE
+	int "the stack size of idle thread"
+	default 256
+	
+config RT_USING_TIMER_SOFT
+	bool "enable software timer"
+	default n
+	help 
+		enable software timer or not
+		
+if RT_USING_TIMER_SOFT
+config RT_TIMER_THREAD_PRIO	
+	int "the prio of timer thread"
+	default 4
+	
+config RT_TIMER_THREAD_STACK_SIZE
+	int "the stack size of timer thread"
+	default 512
+	
+	
+endif
+
+
+menu "inter thread communication"
+config RT_USING_SEMAPHORE
+	bool "enable sem"
+	default y
+	
+config RT_USING_MUTEX
+	bool "enable mutex"
+	default y
+	
+config RT_USING_EVENT
+	bool "enable event flag"
+	default y
+	
+config RT_USING_MAILBOX
+	bool "enable mailbox"
+	default y
+config RT_USING_MESSAGEQUEUE
+	bool "enable message queue"
+	default y
+	
+config RT_USING_SIGNALS
+	bool "enable signals"
+	select RT_USING_MEMPOOL
+	default n
+	help
+		a signal is an asynchronous notification sent to a thread 
+endmenu
+
+menu "memory management"
+	config RT_USING_MEMPOOL
+		bool "using mem pool"
+		default y
+		
+	config RT_USING_MEMHEAP
+		bool "using mem heap"
+		default n
+		
+	choice 
+		prompt "dynamic memory management"
+		default RT_USING_SMALL_MEM
+		
+		config RT_USING_HEAP
+			bool "disable heap"
+			
+		config RT_USING_SMALL_MEM
+			bool "small memory algorithm"
+			
+		config RT_USING_SLAB
+			bool "slab algorithm for large memory"
+			
+		if RT_USING_MEMHEAP
+		config RT_USING_MEMHEAD_AS_HEAP
+			bool "use all of memheap as heap"
+		endif
+	endchoice
+	
+	if RT_USING_SMALL_MEM
+		config RT_USING_MEMTRACE
+			bool "enable mem trace"
+			default n
+			
+	endif
+	config RT_USING_HEAP
+		bool 
+		default n if RT_USING_NOHEAP
+		default y if RT_USING_SMALL_MEM
+		default y if RT_USING_SLAB
+		default y if RT_USING_MEMHEAD_AS_HEAP
+		
+endmenu
+
+menu "kernel device object "
+	config RT_USING_DEVICE
+		bool "using device object"
+		default y
+		
+	config RT_USING_INTERRUPT_INFO
+		bool "enable interrupt trace info"
+		default n
+		
+	config RT_USING_CONSOLE
+		bool "using console for rt_kprintf"
+		default y
+		
+	if RT_USING_CONSOLE
+		config RT_CONSOLEBUF_SIZE
+			int "the buffer size for console log printf"
+			default 128
+			
+		config RT_CONSOLE_DEVICE_NAME
+			string "the device name for console"
+			default "uart"
+	endif
+endmenu
+
+config RT_USING_MODULE
+	bool "enable module"
+	default n
+	
+endmenu
+

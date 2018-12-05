@@ -1,0 +1,15 @@
+menu "rt-thread components"
+
+config RT_USING_COMPONENTS_INIT
+    bool "use components init"
+    default y
+    
+if RT_USING_COMPONENTS_INIT
+    config RT_USING_USER_MAIN
+        bool "the main() function as user entry function"
+        default y
+        
+endif
+
+endmenu
+

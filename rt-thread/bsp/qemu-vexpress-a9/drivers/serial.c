@@ -1,7 +1,7 @@
 #include <rtthread.h>
 #include <rthw.h>
 #include <serial.h>
-
+#include "realview.h"
 struct hw_uart_device {
 	rt_uint32_t hw_base;
 	rt_uint32_t irqno;
@@ -98,6 +98,7 @@ int rt_hw_uart_init(void)
 	uart = &_uart0_device;
 	_serial0.ops = &_uart_ops;
 	_serial0.config = config;
-	
+
+	rt_hw_serial_register();
 }
 

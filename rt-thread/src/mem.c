@@ -9,6 +9,7 @@ struct heap_mem {
 #define HEAP_MAGIC 0x1ea0
 
 #define MIN_SIZE 12
+#define MIN_SIZE_ALIGNED RT_ALIGN(MIN_SIZE, RT_ALIGN_SIZE)
 #define SIZEOF_STRUCT_MEM RT_ALIGN(sizeof(struct heap_mem), RT_ALIGN_SIZE)
 
 static rt_size_t mem_size_aligned;
@@ -18,6 +19,59 @@ static struct heap_mem *heap_end;
 static struct rt_semaphore heap_sem;
 
 static struct heap_mem *lfree;
+
+
+void *rt_malloc(rt_size_t size)
+{
+	if(size == 0) {
+		return RT_NULL;
+	}
+	size = RT_ALIGN(size, RT_ALIGN_SIZE);
+	if(size > mem_size_aligned) {
+		return RT_NULL;
+	}
+	rt_sem_take(&heap_sem, RT_WAITING_FOREVER);
+	rt_size_t ptr, ptr2;
+	struct heap_mem *mem, *mem2;
+	for(
+		ptr = (rt_uint8_t *)lfree - heap_ptr;
+		ptr < mem_size_aligned - size;
+		ptr = ((struct heap_mem *)&heap_ptr[ptr])->next
+	) {
+		mem = (struct heap_mem *)&heap_ptr[ptr];
+		if((!mem->used) && (mem->next - (ptr + SIZEOF_STRUCT_MEM))>=size) {
+			if(mem->next - (ptr + SIZEOF_STRUCT_MEM) >= 
+				(size + SIZEOF_STRUCT_MEM + MIN_SIZE_ALIGNED)) {
+				//this is always happen
+				ptr2 = ptr + SIZEOF_STRUCT_MEM + size;
+				mem2 = (struct heap_mem *)&heap_ptr[ptr2];
+				mem2->magic = HEAP_MAGIC;
+				mem2->used = 0;
+				mem2->next = mem->next;
+				mem2->prev = ptr;
+
+				mem->next = ptr2;
+				mem->used = 1;
+
+				if(mem2->next != mem_size_aligned + SIZEOF_STRUCT_MEM) {
+					((struct heap_mem *)&heap_ptr[mem2->next])->prev = ptr2;
+				}
+			} else {
+				mem->used = 1;
+			}
+			mem->magic = HEAP_MAGIC;
+			if(mem == lfree) {
+				while(lfree->used && lfree!=heap_end) {
+					lfree = (struct heap_mem *)&heap_ptr[lfree->next];
+				}
+			}
+			rt_sem_release(&heap_sem);
+			return (rt_uint8_t *)mem + SIZEOF_STRUCT_MEM;
+		}
+	}
+	rt_sem_release(&heap_mem);
+	return RT_NULL;
+}
 
 void rt_system_heap_init(
 	void *begin_addr,

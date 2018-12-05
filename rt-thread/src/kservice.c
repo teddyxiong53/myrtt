@@ -11,6 +11,7 @@
 
 static rt_device_t _console_device = RT_NULL;
 
+static volatile int __rt_errno;
 
 rt_inline int skip_atoi(const char **s)
 {
@@ -420,3 +421,17 @@ void rt_show_version()
 	
 }
 
+
+void rt_set_errno(rt_err_t error)
+{
+	__rt_errno = error;
+}
+
+void *rt_memset(void *s, int c, rt_ubase_t count)
+{
+	char *xs = (char *)s;
+	while(count--) {
+		*xs ++ = c;
+	}
+	return s;
+}

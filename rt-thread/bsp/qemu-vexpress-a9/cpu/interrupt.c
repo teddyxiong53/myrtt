@@ -11,8 +11,9 @@ rt_uint32_t rt_thread_switch_interrupt_flag;
 
 extern volatile rt_uint8_t rt_interrupt_nest;
 extern int system_vectors;
+extern void rt_cpu_vector_set_base(unsigned int addr);
 
-static rt_hw_vector_init()
+static void rt_hw_vector_init()
 {
 	rt_cpu_vector_set_base((unsigned int)&system_vectors);
 }

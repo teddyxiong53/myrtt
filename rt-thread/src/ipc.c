@@ -21,3 +21,23 @@ rt_err_t rt_sem_init(
 	return RT_EOK;
 }
 
+
+rt_err_t rt_sem_take(rt_sem_t sem, rt_uint32_t time)
+{
+#if 0
+	rt_base_t temp;
+	temp = rt_hw_interrupt_disable();
+	if(sem->value > 0) {
+		sem->value --;
+		rt_hw_interrupt_enable(temp);
+	} else {
+		
+	}
+#endif
+	return RT_EOK;
+}
+
+rt_err_t rt_sem_release(rt_sem_t sem)
+{
+	return RT_EOK;
+}

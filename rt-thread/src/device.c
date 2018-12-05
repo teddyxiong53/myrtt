@@ -68,3 +68,21 @@ rt_err_t rt_device_close(rt_device_t dev)
 	return ret;
 }
 
+
+rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos,
+	const void *buffer,
+	rt_size_t size
+)
+{
+	if(dev->ref_count == 0) {
+		rt_set_errno(-RT_ERROR);
+		return 0;
+	}
+	if(dev->write != RT_NULL) {
+		return dev->write(dev, pos, buffer, size);
+	}
+	rt_set_errno(-RT_ENOSYS);
+	return 0;
+}
+
+

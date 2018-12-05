@@ -246,6 +246,8 @@ typedef struct rt_thread * rt_thread_t;
 #define RT_IPC_FLAG_FIFO 0X00
 #define RT_IPC_FLAG_PRIO 0X01
 
+#define RT_WAITING_FOREVER -1
+#define RT_WAITING_NO    0
 
 
 struct rt_ipc_object {
@@ -276,6 +278,10 @@ enum rt_device_class_type {
 #define RT_DEVICE_FLAG_ACTIVATED  0x010
 #define RT_DEVICE_FLAG_SUSPENDED	0X020
 #define RT_DEVICE_FLAG_STREAM 0x040
+
+#define RT_DEVICE_FLAG_INT_RX 0X100
+#define RT_DEVICE_FLAG_INT_TX 0x400
+
 
 
 #define RT_DEVICE_OFLAG_CLOSE 0x000

@@ -29,7 +29,7 @@ rt_err_t rt_device_register(
 	if(rt_device_find(name) != RT_NULL) {
 		return -RT_ERROR;
 	}
-	rt_object_init(&(dev->parent), RT_Object_Class_Device);
+	rt_object_init(&(dev->parent), RT_Object_Class_Device, name);
 	dev->flag = flags;
 	dev->ref_count = 0;
 	dev->open_flag = 0;

@@ -25,7 +25,7 @@ static rt_err_t rt_serial_open(struct rt_device *dev, rt_uint16_t oflag)
 		//only process int 
 		struct rt_serial_rx_fifo *rx_fifo;
 		rx_fifo = (struct rt_serial_rx_fifo *)rt_malloc(sizeof(struct rt_serial_rx_fifo) + serial->config.bufsz);
-		if(rx_fifo) {
+		if(!rx_fifo) {
 			return -RT_ENOMEM;
 		}
 		rx_fifo->buffer = (rt_uint8_t *)(rx_fifo + 1);//+1 means skip sizeof(struct rt_serial_rx_fifo)

@@ -11,7 +11,7 @@ if RT_USING_COMPONENTS_INIT
         
 endif
 
-source "$RTT_DIR/components/drivers/Kconfig"
+
 
 
 endmenu

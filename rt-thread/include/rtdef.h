@@ -158,7 +158,7 @@ enum rt_object_class_type {
 	RT_Object_Class_MemPool,
 	RT_Object_Class_Device,
 	RT_Object_Class_Timer,
-	RT_Object_Class_Module,
+	//RT_Object_Class_Module,
 	RT_Object_Class_Unknown,
 	RT_Object_Class_Static = 0x80
 };
@@ -262,11 +262,91 @@ struct rt_semaphore {
 typedef struct rt_semaphore *rt_sem_t;
 
 
-enum rt_device_class_type {
-	RT_Device_Class_Char = 0,
-	RT_Device_Class_Block,
+struct rt_mutex {
+	struct rt_ipc_object parent;
+	rt_uint16_t value;
+	rt_uint8_t original_priority;
+	rt_uint8_t hold;
+	struct rt_thread *owner;
+};
+typedef struct rt_mutex *rt_mutex_t;
+
+struct rt_event {
+	struct rt_ipc_object parent;
+	rt_uint32_t set;
+};
+typedef struct rt_event *rt_event_t;
+
+struct rt_mailbox {
+	struct rt_ipc_object parent;
+	rt_uint32_t *msg_pool;
+	rt_uint16_t size;
+	rt_uint16_t entry;
+	rt_uint16_t in_offset;
+	rt_uint16_t out_offset;
+	rt_list_t suspend_sender_thread;
+};
+
+typedef struct rt_mailbox *rt_mailbox_t;
+
+struct rt_messagequeue {
+	struct rt_ipc_object parent;
+	void *msg_pool;
+	rt_uint16_t msg_size,
+		max_msgs,
+		entry;
+	void *msg_queue_head,
+		*msg_queue_tail,
+		*msg_queue_free;
 	
-	RT_Device_Class_Unknown
+};
+
+typedef struct rt_messagequeue *rt_mq_t;
+
+struct rt_memheap_item {
+	int a;
+};
+struct rt_memheap {
+	struct rt_object parent;
+	void *start_addr;
+
+	rt_uint32_t pool_size,
+		available_size,
+		max_used_size;
+	struct rt_memheap_item *block_list,
+		*free_list;
+	struct rt_memheap_item free_header;
+	struct rt_semaphore lock;
+		
+};
+
+struct rt_mempool {
+	int a;
+};
+typedef struct rt_mempool *rt_mp_t;
+
+
+enum rt_device_class_type {
+	RT_Device_Class_Char = 0,                           /**< character device */
+    RT_Device_Class_Block,                              /**< block device */
+    RT_Device_Class_NetIf,                              /**< net interface */
+    RT_Device_Class_MTD,                                /**< memory device */
+    RT_Device_Class_CAN,                                /**< CAN device */
+    RT_Device_Class_RTC,                                /**< RTC device */
+    RT_Device_Class_Sound,                              /**< Sound device */
+    RT_Device_Class_Graphic,                            /**< Graphic device */
+    RT_Device_Class_I2CBUS,                             /**< I2C bus device */
+    RT_Device_Class_USBDevice,                          /**< USB slave device */
+    RT_Device_Class_USBHost,                            /**< USB host bus */
+    RT_Device_Class_SPIBUS,                             /**< SPI bus device */
+    RT_Device_Class_SPIDevice,                          /**< SPI device */
+    RT_Device_Class_SDIO,                               /**< SDIO bus device */
+    RT_Device_Class_PM,                                 /**< PM pseudo device */
+    RT_Device_Class_Pipe,                               /**< Pipe device */
+    RT_Device_Class_Portal,                             /**< Portal device */
+    RT_Device_Class_Timer,                              /**< Timer device */
+    RT_Device_Class_Miscellaneous,                      /**< Miscellaneous device */
+    RT_Device_Class_Unknown  
 };
 
 #define RT_DEVICE_FLAG_RDONLY 0X001

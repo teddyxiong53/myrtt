@@ -7,7 +7,7 @@ static rt_err_t rt_serial_init(struct rt_device *dev)
 {
 	rt_err_t result = RT_EOK;
 	struct rt_serial_device *serial;
-	serial = (sturct rt_serial_device *)dev;
+	serial = (struct rt_serial_device *)dev;
 	serial->serial_rx = RT_NULL;
 	serial->serial_tx = RT_NULL;
 	if(serial->ops->configure) {
@@ -107,8 +107,23 @@ rt_inline int _serial_int_tx(struct rt_serial_device *serial,
 	const rt_uint8_t *data, int length
 )
 {
-	
+	int size;
+	struct rt_serial_tx_fifo *tx;
+	RT_ASSERT(serial != RT_NULL);
+	size = length;
+	tx = (struct rt_serial_tx_fifo *)serial->serial_tx;
+	RT_ASSERT(tx != RT_NULL);
+	while(length) {
+		if(serial->ops->putc(serial, *(char *)data) == -1) {
+			rt_completion_wait(&(tx->completion), RT_WAITING_FOREVER);
+			continue;
+		}
+		data ++;
+		length --;
+	}
+	return size -length;
 }
+
 static rt_size_t rt_serial_write(struct rt_device *dev,
 	rt_off_t pos,
 	const void *buffer,
@@ -121,8 +136,18 @@ static rt_size_t rt_serial_write(struct rt_device *dev,
 		return 0;
 	}
 	serial = (struct rt_serial_device *)dev;
-	return _serial_int_tx(serial, buffer, size)
+	return _serial_int_tx(serial, buffer, size);
 }
+
+rt_err_t rt_serial_control(
+	struct rt_device *dev,
+	int cmd,
+	void *args
+)
+{
+	return RT_EOK;
+}
+
 rt_err_t rt_hw_serial_register(
 	struct rt_serial_device *serial,
 	const char *name,
@@ -137,7 +162,57 @@ rt_err_t rt_hw_serial_register(
 	device->rx_indicate = RT_NULL;
 	device->tx_complete = RT_NULL;
 	device->init = rt_serial_init;
+	device->open = rt_serial_open;
+	device->read = rt_serial_read;
+	device->write = rt_serial_write;
+	device->control = rt_serial_control;
+	device->user_data = data;
+
+	ret = rt_device_register(device ,name, flag);
+	return ret;
 }
 
 
 
+void rt_hw_serial_isr(struct rt_serial_device *serial, int event)
+{
+	switch(event & 0xff) {
+		case RT_SERIAL_EVENT_RX_IND:
+		{
+			int ch = -1;
+			rt_base_t level;
+			struct rt_serial_rx_fifo *rx_fifo;
+			rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_tx;
+			while(1) {
+				ch = serial->ops->getc(serial);
+				if(ch==-1) {
+					break;
+				}
+				level = rt_hw_interrupt_disable();
+				rx_fifo->buffer[rx_fifo->put_index] = ch;
+				rx_fifo->put_index++;
+				if(rx_fifo->put_index >= serial->config.bufsz) {
+					rx_fifo->put_index = 0;
+				}
+				if(rx_fifo->put_index == rx_fifo->get_index) {
+					rx_fifo->get_index+=1;
+					rx_fifo->is_full = RT_TRUE;
+					if(rx_fifo->get_index >= serial->config.bufsz) {
+						rx_fifo->get_index = 0;
+					}
+				}
+				rt_hw_interrupt_enable(level);
+				
+			}
+			break;
+			
+		}
+		case RT_SERIAL_EVENT_TX_DONE:
+		{
+			struct rt_serial_tx_fifo *tx_fifo;
+			tx_fifo = (struct rt_serial_tx_fifo *)serial->serial_tx;
+			rt_completion_done(&(tx_fifo->completion));
+			break;	
+		}
+	}
+}

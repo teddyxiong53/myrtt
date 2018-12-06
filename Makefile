@@ -6,7 +6,7 @@ NET_DEV = lan9118
 
 BSP_DIR = rt-thread/bsp/$(BSP)/
 #BOOT_CMD = qemu-system-arm -M $(BOARD) -net nic,model=$(NET_DEV) -net tap -kernel $(BSP_DIR)/rtthread.elf -sd ./sd0 -serial stdio 
-BOOT_CMD = qemu-system-arm -M $(BOARD) -kernel $(BSP_DIR)/rtthread.elf  
+BOOT_CMD = qemu-system-arm -M $(BOARD) -kernel $(BSP_DIR)/rtthread.elf 
 ifneq ($(G),1)
   BOOT_CMD += -nographic
 endif

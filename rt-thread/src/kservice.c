@@ -163,15 +163,18 @@ char *rt_strncpy(char *dst, char *src, rt_ubase_t n)
 
 rt_int32_t rt_strncmp(const char *cs, const char *ct, rt_ubase_t count)
 {
-	char res = 0;
-	while(count) {
-		if((res = *cs - *ct++)!=0 || !*cs++) {
+	register signed char __res = 0;
+
+	while (count)
+	{
+		if ((__res = *cs - *ct++) != 0 || !*cs++)
 			break;
-		}
 		count --;
 	}
-	return res;
+
+	return __res;
 }
+
 
 rt_device_t rt_console_set_device(const char *name)
 {

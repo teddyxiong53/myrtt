@@ -32,12 +32,14 @@ int rtthread_startup()
 	rt_hw_interrupt_disable();
 	rt_hw_board_init();
 	rt_show_version();
-	
+	while(1) {
+		;
+	}
 }
 
 void rt_components_board_init()
 {
-#if 0
+#if 1
 	const init_fn_t *fn_ptr;
 	for(fn_ptr=&__rt_init_rti_board_start; fn_ptr<&__rt_init_rti_board_end; fn_ptr++) {
 		(*fn_ptr)();

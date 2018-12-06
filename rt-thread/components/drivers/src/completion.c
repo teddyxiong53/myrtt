@@ -15,5 +15,17 @@ void rt_completion_init(struct rt_completion *completion)
 }
 
 
+rt_err_t rt_completion_wait(struct rt_completion *completion, 
+	rt_int32_t timeout
+)
+{
+	return RT_EOK;
+}
+
+void rt_completion_done(struct rt_completion *completion)
+{
+	
+}
+
 
 

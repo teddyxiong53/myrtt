@@ -69,7 +69,7 @@ void *rt_malloc(rt_size_t size)
 			return (rt_uint8_t *)mem + SIZEOF_STRUCT_MEM;
 		}
 	}
-	rt_sem_release(&heap_mem);
+	rt_sem_release(&heap_sem);
 	return RT_NULL;
 }
 

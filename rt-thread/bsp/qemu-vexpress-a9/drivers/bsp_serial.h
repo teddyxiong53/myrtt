@@ -1,6 +1,10 @@
 #ifndef __SERIAL_H__
 #define __SERIAL_H__
 
+#ifdef XXX
+#error "xxx"
+#endif
+
 #define BAUD_RATE_115200	115200
 
 #define DATA_BITS_8 8
@@ -18,6 +22,7 @@
 
 #define RT_DEVICE_CTRL_SET_INT 0x10
 #define RT_DEVICE_CTRL_CLR_INT 0x11
+
 
 struct serial_configure {
 	rt_uint32_t baud_rate;

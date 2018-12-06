@@ -1,3 +1,27 @@
+/*
+ * File      : start_gcc.S
+ * This file is part of RT-Thread RTOS
+ * COPYRIGHT (C) 2013-2014, RT-Thread Development Team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2013-07-05     Bernard      the first version
+ */
+
 .equ Mode_USR,        0x10
 .equ Mode_FIQ,        0x11
 .equ Mode_IRQ,        0x12
@@ -10,16 +34,15 @@
 .equ F_Bit,           0x40            @ when F bit is set, FIQ is disabled
 
 .equ UND_Stack_Size,     0x00000000
-.equ SVC_Stack_Size,     0x00000400
+.equ SVC_Stack_Size,     0x00000100
 .equ ABT_Stack_Size,     0x00000000
 .equ RT_FIQ_STACK_PGSZ,  0x00000000
-.equ RT_IRQ_STACK_PGSZ,  0x00000800
-.equ USR_Stack_Size,     0x00000400
+.equ RT_IRQ_STACK_PGSZ,  0x00000100
+.equ USR_Stack_Size,     0x00000100
 
 #define ISR_Stack_Size  (UND_Stack_Size + SVC_Stack_Size + ABT_Stack_Size + \
                  RT_FIQ_STACK_PGSZ + RT_IRQ_STACK_PGSZ)
-				 
-				 
+
 .section .data.share.isr
 /* stack */
 .globl stack_start
@@ -48,9 +71,7 @@ _reset:
     mov     r0,#0                   /* get a zero                       */
     ldr     r1,=__bss_start         /* bss start                        */
     ldr     r2,=__bss_end           /* bss end                          */
-	
-	
-	
+
 bss_loop:
     cmp     r1,r2                   /* check if data to clear           */
     strlo   r0,[r1],#4              /* clear 4 bytes                    */
@@ -59,7 +80,7 @@ bss_loop:
     /* call C++ constructors of global objects                          */
     ldr     r0, =__ctors_start__
     ldr     r1, =__ctors_end__
-	
+
 ctor_loop:
     cmp     r0, r1
     beq     ctor_end
@@ -70,6 +91,7 @@ ctor_loop:
     ldmfd   sp!, {r0-r1}
     b       ctor_loop
 ctor_end:
+
     /* start RT-Thread Kernel */
     ldr     pc, _rtthread_startup
 _rtthread_startup:
@@ -133,7 +155,7 @@ vector_irq:
     bl      rt_interrupt_leave
 
     @ if rt_thread_switch_interrupt_flag set, jump to
-    @ rt_hw_context_switch_interrupt_do and don't return
+    @ rt_hw_context_switch_interrupt_do and don't return'
     ldr     r0, =rt_thread_switch_interrupt_flag
     ldr     r1, [r0]
     cmp     r1, #1
@@ -150,31 +172,31 @@ rt_hw_context_switch_interrupt_do:
     add     sp, sp, #4*4
     ldmfd   sp!, {r4-r12,lr}@ reload saved registers
     mrs     r0,  spsr       @ get cpsr of interrupt thread
-    sub     r2,  lr, #4     @ save old task's pc to r2
+    sub     r2,  lr, #4     @ save old task's pc to r2'
 
     @ Switch to SVC mode with no interrupt. If the usr mode guest is
     @ interrupted, this will just switch to the stack of kernel space.
-    @ save the registers in kernel space won't trigger data abort.
+    @ save the registers in kernel space won't trigger data abort.'
     msr     cpsr_c, #I_Bit|F_Bit|Mode_SVC
 
-    stmfd   sp!, {r2}       @ push old task's pc
-    stmfd   sp!, {r4-r12,lr}@ push old task's lr,r12-r4
+    stmfd   sp!, {r2}       @ push old task's pc'
+    stmfd   sp!, {r4-r12,lr}@ push old task's lr,r12-r4'
     ldmfd   r1,  {r1-r4}    @ restore r0-r3 of the interrupt thread
-    stmfd   sp!, {r1-r4}    @ push old task's r0-r3
-    stmfd   sp!, {r0}       @ push old task's cpsr
+    stmfd   sp!, {r1-r4}    @ push old task's r0-r3'
+    stmfd   sp!, {r0}       @ push old task's cpsr'
 
     ldr     r4,  =rt_interrupt_from_thread
     ldr     r5,  [r4]
-    str     sp,  [r5]       @ store sp in preempted tasks's TCB
+    str     sp,  [r5]       @ store sp in preempted tasks's TCB'
 
     ldr     r6,  =rt_interrupt_to_thread
     ldr     r6,  [r6]
-    ldr     sp,  [r6]       @ get new task's stack pointer
+    ldr     sp,  [r6]       @ get new task's stack pointer'
 
-    ldmfd   sp!, {r4}       @ pop new task's cpsr to spsr
+    ldmfd   sp!, {r4}       @ pop new task's cpsr to spsr'
     msr     spsr_cxsf, r4
 
-    ldmfd   sp!, {r0-r12,lr,pc}^ @ pop new task's r0-r12,lr & pc, copy spsr to cpsr
+    ldmfd   sp!, {r0-r12,lr,pc}^ @ pop new task's r0-r12,lr & pc, copy spsr to cpsr'
 
 .macro push_svc_reg
     sub     sp, sp, #17 * 4         @/* Sizeof(struct rt_hw_exp_stack)  */

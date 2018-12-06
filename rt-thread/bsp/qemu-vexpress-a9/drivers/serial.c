@@ -1,7 +1,9 @@
 #include <rtthread.h>
 #include <rthw.h>
-#include <serial.h>
+#include "bsp_serial.h"
 #include "realview.h"
+#include <rtdevice.h>
+
 struct hw_uart_device {
 	rt_uint32_t hw_base;
 	rt_uint32_t irqno;
@@ -89,7 +91,11 @@ static const struct rt_uart_ops _uart_ops = {
 	uart_getc,
 };
 
-
+static void rt_hw_uart_isr(int irqno, void *param)
+{
+	struct rt_serial_device *serial = (struct rt_serial_device *)param;
+	rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_IND);
+}
 int rt_hw_uart_init(void)
 {
 	struct hw_uart_device *uart;
@@ -99,6 +105,15 @@ int rt_hw_uart_init(void)
 	_serial0.ops = &_uart_ops;
 	_serial0.config = config;
 
-	rt_hw_serial_register();
+	rt_hw_serial_register(&_serial0, "uart0", RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX, uart);
+	
+	rt_hw_interrupt_install(uart->irqno, rt_hw_uart_isr, &_serial0, "uart0");
+
+	//enable rx and tx of uart
+	UART_CR(uart->hw_base) = (1<<0) | (1<<8) | (1<<9);
+	return 0;
 }
+
+INIT_BOARD_EXPORT(rt_hw_uart_init);
+
 

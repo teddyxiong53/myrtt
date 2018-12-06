@@ -186,7 +186,7 @@ menu "kernel device object "
 			
 		config RT_CONSOLE_DEVICE_NAME
 			string "the device name for console"
-			default "uart"
+			default "uart0"
 	endif
 endmenu
 

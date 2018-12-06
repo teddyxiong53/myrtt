@@ -41,3 +41,25 @@ void rt_hw_interrupt_umask(int vector)
 {
 	arm_gic_umask(0, vector);
 }
+
+
+
+rt_isr_handler_t rt_hw_interrupt_install(
+	int vector,
+	rt_isr_handler_t handler,
+	void *param,
+	char *name
+)
+{
+	rt_isr_handler_t old_handler = RT_NULL;
+	if(vector < MAX_HANDLERS) {
+		old_handler = isr_table[vector].handler;
+		if(handler != RT_NULL) {
+			isr_table[vector].handler = handler;
+			isr_table[vector].param = param;
+		}
+		
+	}
+	return old_handler;
+}
+

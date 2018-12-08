@@ -33,4 +33,11 @@ struct dirent {
 	char d_name[DFS_PATH_MAX];
 };
 
+
+
+void dfs_lock();
+void dfs_unlock();
+
+
+
 #endif

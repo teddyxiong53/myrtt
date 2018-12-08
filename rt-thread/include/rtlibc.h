@@ -2,7 +2,7 @@
 #define _RTLIBC_H_
 
 #include "libc/libc_stat.h"
-//#include "libc/libc_errno.h"
+#include "libc/libc_errno.h"
 
 //#include "libc/libc_fcntl.h"
 //#include "libc/libc_ioctl.h"

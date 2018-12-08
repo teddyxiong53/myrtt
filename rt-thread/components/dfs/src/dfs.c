@@ -14,6 +14,16 @@ struct dfs_fd fd_table[DFS_FD_MAX];
 
 static struct rt_mutex fslock;
 
+void dfs_lock(void)
+{
+	rt_err_t result;
+	result = rt_mutex_take(&fslock, RT_WAITING_FOREVER);
+	
+}
+void dfs_unlock(void)
+{
+	rt_mutex_release(&fslock);
+}
 
 int dfs_init()
 {

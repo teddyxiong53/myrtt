@@ -429,6 +429,52 @@ rt_int32_t rt_vsnprintf(char *buf, rt_size_t size, const char *fmt, va_list args
 	return str - buf;
 }
 
+void *rt_memcpy(void *dst, const void *src, rt_ubase_t count)
+{
+    char *tmp = (char *)dst, *s = (char *)src;
+    rt_ubase_t len;
+    
+    if(tmp <= s || tmp > (s + count))
+    {
+        while (count--)
+            *tmp ++ = *s ++;
+    }
+    else
+    {
+        for(len = count; len > 0; len --)
+            tmp[len -1] = s[len - 1];
+    }
+
+    return dst; 
+}
+rt_int32_t rt_snprintf(
+	char *buf,
+	rt_size_t size,
+	const char *fmt, 
+	...
+)
+{
+	rt_int32_t n;
+	va_list args;
+	va_start(args, fmt);
+	n = rt_vsnprintf(buf, size, fmt, args);
+	va_end(args);
+	return n;
+}
+
+char *rt_strdup(const char *s)
+{
+    rt_size_t len = rt_strlen(s) + 1;
+    char *tmp = (char *)rt_malloc(len);
+
+    if (!tmp)
+        return RT_NULL;
+
+    rt_memcpy(tmp, s, len);
+
+    return tmp;
+}
+
 void rt_kprintf(const char *fmt, ...)
 {
 	va_list args;

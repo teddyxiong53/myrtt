@@ -113,26 +113,6 @@ static rt_size_t rt_serial_read(
 	return _serial_int_rx(serial, buffer, size);
 }
 
-rt_inline int _serial_int_tx(struct rt_serial_device *serial,
-	const rt_uint8_t *data, int length
-)
-{
-	int size;
-	struct rt_serial_tx_fifo *tx;
-	RT_ASSERT(serial != RT_NULL);
-	size = length;
-	tx = (struct rt_serial_tx_fifo *)serial->serial_tx;
-	RT_ASSERT(tx != RT_NULL);
-	while(length) {
-		if(serial->ops->putc(serial, *(char *)data) == -1) {
-			rt_completion_wait(&(tx->completion), RT_WAITING_FOREVER);
-			continue;
-		}
-		data ++;
-		length --;
-	}
-	return size -length;
-}
 
 rt_inline rt_size_t _serial_poll_tx(
 	struct rt_serial_device *serial,

@@ -58,16 +58,42 @@ void finsh_thread_entry(void *parameter)
 	while(1) {
 		ch = finsh_getchar();
 		if(ch=='\0') {
-			continue;
+			continue;//for 'CR', never happen 
 		} else if(ch == '\t') {
 			
 		}
 
 		if(ch == '\r' || ch =='\n') {
 			if(shell->echo_mode) {
-				rt_kprintf(FINSH_PROMPT"\n");
+				rt_kprintf("\n");
+				//msh_exec(shell->line, shell->line_position);
+			}
+			rt_kprintf(FINSH_PROMPT);
+			memset(shell->line, 0, sizeof(shell->line));
+			shell->line_curpos = shell->line_position = 0;
+			continue;
+		}
+
+		if(shell->line_position >= FINSH_CMD_SIZE) {
+			shell->line_position = 0;
+		}
+		if(shell->line_curpos < shell->line_position) {
+			
+		} else {
+			shell->line[shell->line_position] = ch;
+			if(shell->echo_mode) {
+				rt_kprintf("%c", ch);
 			}
 		}
+
+		ch = 0;
+		shell->line_position++;
+		shell->line_curpos++;
+		if(shell->line_position >= FINSH_CMD_SIZE) {
+			shell->line_position = 0;
+			shell->line_curpos = 0;
+		}
+		
 	}
 }
 

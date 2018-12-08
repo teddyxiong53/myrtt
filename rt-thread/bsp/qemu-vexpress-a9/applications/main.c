@@ -2,10 +2,11 @@
 #include <rtthread.h>
 #include <stdint.h>
 
-#define TEST_BASIC 1
+#define TEST_BASIC 0
 #define TEST_SEM  0
 
 #define TEST_MEM 0
+#define TEST_MUTEX 1
 
 #if TEST_BASIC
 int main(void)
@@ -75,3 +76,38 @@ int main(void)
 	rt_kprintf("p1:%p, p2:%p, p3:%p\n",p1, p2, p3);
 }
 #endif
+
+
+#if TEST_MUTEX
+struct rt_thread mutex_thread;
+rt_uint8_t mutex_thread_stack[1024];
+struct rt_mutex mutex_test;
+void mutex_thread_entry(void *parameter)
+{
+	rt_thread_delay(500);
+	rt_kprintf("now rt_mutex_release, current tick:%d\n", rt_tick_get());
+	rt_mutex_release(&mutex_test);
+}
+int main(void)
+{
+	rt_thread_init(&mutex_thread, 
+		"mutexpost",
+		mutex_thread_entry,
+		RT_NULL,
+		&mutex_thread_stack[0],
+		1024,
+		30,
+		10
+		);
+	rt_thread_startup(&mutex_thread);
+	rt_mutex_init(&mutex_test, "mutex1", 0, 0);
+	rt_kprintf("before rt_mutex_take,current tick:%d\n", rt_tick_get());
+	rt_mutex_take(&mutex_test, -1);
+	
+	rt_kprintf("after rt_mutex_take, current tick:%d\n", rt_tick_get());
+	
+}
+
+
+#endif
+

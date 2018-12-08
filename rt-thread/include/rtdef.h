@@ -219,6 +219,13 @@ typedef struct rt_timer *rt_timer_t;
 
 #define RT_THREAD_STAT_MASK 	0x0f
 
+
+#define RT_THREAD_CTRL_STARTUP  0X00
+#define RT_THREAD_CTRL_CLOSE 	0X01
+
+#define RT_THREAD_CTRL_CHANGE_PRIORITY 0X02
+#define RT_THREAD_CTRL_INFO 	0X03
+
 struct rt_thread {
 	char name[RT_NAME_MAX];
 	rt_uint8_t type;

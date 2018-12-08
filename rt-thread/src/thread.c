@@ -194,3 +194,33 @@ rt_err_t rt_thread_init(
 	);
 }
 
+
+
+rt_err_t rt_thread_control(
+	rt_thread_t thread,
+	int cmd,
+	void *arg
+)
+{
+	rt_base_t temp;
+	switch(cmd) {
+		case RT_THREAD_CTRL_CHANGE_PRIORITY:
+			temp = rt_hw_interrupt_disable();
+			if((thread->stat & RT_THREAD_STAT_MASK) == RT_THREAD_READY) {
+				rt_schedule_remove_thread(thread);
+				thread->current_priority = *(rt_uint8_t *)arg;
+
+				thread->number_mask = 1<<thread->current_priority;
+
+				rt_schedule_insert_thread(thread);
+			} else {
+				thread->current_priority = *(rt_uint8_t *)arg;
+				thread->number_mask = 1<<thread->current_priority;
+			}
+			rt_hw_interrupt_enable(temp);
+			break;
+	}
+	return RT_EOK;
+}
+
+

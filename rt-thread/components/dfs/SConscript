@@ -1,0 +1,22 @@
+from building import *
+
+src = Split('''
+src/dfs.c
+src/dfs_file.c
+src/dfs_fs.c
+src/dfs_posix.c
+'''
+)
+
+cwd = GetCurrentDir()
+CPPPATH = [cwd + "/include"]
+
+group = DefineGroup('FileSystem', src, depend=[''], CPPPATH=CPPPATH)
+
+list = os.listdir(cwd)
+
+for item in list:
+	if os.path.isfile(os.path.join(cwd, item, 'SConscript')):
+		group = group + SConscript(os.path.join(item, 'SConscript'))
+		
+Return ('group')

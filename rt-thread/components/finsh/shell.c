@@ -66,7 +66,7 @@ void finsh_thread_entry(void *parameter)
 		if(ch == '\r' || ch =='\n') {
 			if(shell->echo_mode) {
 				rt_kprintf("\n");
-				//msh_exec(shell->line, shell->line_position);
+				msh_exec(shell->line, shell->line_position);
 			}
 			rt_kprintf(FINSH_PROMPT);
 			memset(shell->line, 0, sizeof(shell->line));

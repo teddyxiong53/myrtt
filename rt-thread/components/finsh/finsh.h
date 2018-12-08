@@ -28,4 +28,7 @@ struct finsh_syscall {
 #define MSH_CMD_EXPORT(command ,desc) \
 	FINSH_FUNCTION_EXPORT_CMD(command, __cmd_##command, desc)
 
+
+extern struct finsh_syscall *_syscall_table_begin, *_syscall_table_end;
+
 #endif

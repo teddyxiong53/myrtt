@@ -46,7 +46,7 @@ rt_err_t rt_sem_init(
 }
 
 
-rt_err_t rt_sem_take(rt_sem_t sem, rt_uint32_t time)
+rt_err_t rt_sem_take(rt_sem_t sem, rt_int32_t time)
 {
 
 	register rt_base_t temp;

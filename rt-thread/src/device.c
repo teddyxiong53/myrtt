@@ -38,7 +38,14 @@ rt_err_t rt_device_register(
 }
 
 
-
+rt_err_t rt_device_set_rx_indicate(
+	rt_device_t dev,
+	rt_err_t (*rx_ind)(rt_device_t dev, rt_size_t size)
+)
+{
+	dev->rx_indicate = rx_ind;
+	return RT_EOK;
+}
 rt_err_t rt_device_open(rt_device_t dev,
 	rt_uint16_t oflag)
 {

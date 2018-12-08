@@ -450,7 +450,10 @@ void rt_kprintf(const char *fmt, ...)
 	}
 	va_end(args);
 }
-
+rt_device_t rt_console_get_device()
+{
+	return _console_device;
+}
 void rt_show_version()
 {
 	rt_kprintf("rt-thread, version:%d.%d.%d build %s\n", RT_VERION, RT_SUBVERSION,

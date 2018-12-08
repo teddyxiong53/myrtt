@@ -1,0 +1,28 @@
+Import('rtconfig')
+
+from building import *
+
+cwd = GetCurrentDir()
+src = Split("""
+shell.c
+symbol.c
+cmd.c
+"""
+)
+
+msh_src = Split('''
+msh.c
+msh_cmd.c
+msh_file.c
+'''
+)
+
+CPPPATH = [cwd]
+
+LINKFLAGS = ''
+
+src = src + msh_src
+
+group = DefineGroup('finsh', src, depend=[''], CPPPATH=CPPPATH, LINKFLAGS=LINKFLAGS)
+
+Return('group')

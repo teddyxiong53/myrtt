@@ -1,19 +1,22 @@
 #include <stdio.h>
 #include <rtthread.h>
-#define TEST_BASIC 0
+#include <stdint.h>
+
+#define TEST_BASIC 1
 #define TEST_SEM  0
 
-#define TEST_MEM 1
+#define TEST_MEM 0
 
 #if TEST_BASIC
 int main(void)
 {
-	int i = 0;
+#if 0
+	uint8_t i = 0;
 	while(1) {
 		rt_kprintf("main thread, count:%d \n", i++);
 		rt_thread_delay(100);
 	}
-	
+#endif
 }
 
 #endif

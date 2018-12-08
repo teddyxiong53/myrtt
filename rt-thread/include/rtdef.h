@@ -66,10 +66,14 @@ typedef rt_base_t rt_off_t;
 
 #ifdef RT_USING_COMPONENTS_INIT
 typedef int (*init_fn_t)(void);
-
+struct rt_init_desc {
+	const char *fn_name;
+	const init_fn_t fn;
+};
 #define INIT_EXPORT(fn, level) \
-	const init_fn_t __rt_init_##fn SECTION(".rti_fn."level) = fn
-	
+	const char __rti_##fn##_name[] = #fn;\
+	const struct rt_init_desc __rt_init_desc_##fn SECTION(".rti_fn."level) = \
+		{__rti_##fn##_name, fn};
 	
 #endif
 

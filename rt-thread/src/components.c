@@ -28,9 +28,34 @@ static int rti_end()
 }
 INIT_EXPORT(rti_end, "6.end");
 
+void rt_components_board_init()
+{
 
+	int result;
+	const struct rt_init_desc *desc;
+	//rt_kprintf("do components board init\n");
+	for(desc=&__rt_init_desc_rti_board_start; desc<&__rt_init_desc_rti_board_end; desc++) {
+		//rt_kprintf("init func[%s], ", desc->fn_name);
+		result = desc->fn();
+		//rt_kprintf("result:%d\n", result);
+	}
+
+}
+
+void rt_components_init()
+{
+	int result;
+	const struct rt_init_desc *desc;
+	rt_kprintf("do components init\n");
+	for(desc=&__rt_init_desc_rti_board_end; desc < & __rt_init_desc_rti_end; desc++) {
+		rt_kprintf("init func[%s], ", desc->fn_name);
+		result = desc->fn();
+		rt_kprintf("result:%d\n", result);
+	}
+}
 void main_thread_entry(void *parameter)
 {
+	rt_components_init();
 	extern int main();
 	main();
 }
@@ -57,12 +82,3 @@ int rtthread_startup()
 
 }
 
-void rt_components_board_init()
-{
-#if 1
-	const init_fn_t *fn_ptr;
-	for(fn_ptr=&__rt_init_rti_board_start; fn_ptr<&__rt_init_rti_board_end; fn_ptr++) {
-		(*fn_ptr)();
-	}
-#endif
-}

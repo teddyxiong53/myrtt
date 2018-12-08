@@ -50,9 +50,10 @@ int rt_hw_timer_init()
 
 	rt_hw_interrupt_install(IRQ_PBA8_TIMER2_3, rt_hw_timer_isr, 
 		RT_NULL, "tick");
-	
+	rt_hw_interrupt_umask(IRQ_PBA8_TIMER2_3);
+	return 0;
 }
-
+INIT_BOARD_EXPORT(rt_hw_timer_init);
 void rt_hw_board_init()
 {
 	rt_hw_interrupt_init();

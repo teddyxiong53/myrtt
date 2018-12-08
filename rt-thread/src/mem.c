@@ -73,6 +73,55 @@ void *rt_malloc(rt_size_t size)
 	return RT_NULL;
 }
 
+static void plug_holes(struct heap_mem *mem)
+{
+	struct heap_mem *nmem;
+	struct heap_mem *pmem;
+	//plug hole forward
+	nmem = (struct heap_mem *)&heap_ptr[mem->next];
+	if((mem != nmem) &&
+		(nmem->used == 0) &&
+		((rt_uint8_t*)nmem != (rt_uint8_t *)heap_end)) {
+		if(lfree == nmem) {
+			lfree = mem;
+		}
+		mem->next = nmem->next;
+		((struct heap_mem *)&heap_ptr[nmem->next])->prev = (rt_uint8_t *)mem - heap_ptr;
+		
+	}
+	//plug holes backward
+	pmem = (struct heap_mem *)&heap_ptr[mem->prev];
+	if((pmem != mem) &&
+		(pmem->used == 0)) {
+		if(lfree == mem) {
+			lfree = pmem;
+		}
+		pmem->next = mem->next;
+		((struct heap_mem *)&heap_ptr[mem->next])->prev = (rt_uint8_t *)pmem - heap_ptr;
+	}
+		
+}
+
+void rt_free(void *rmem)
+{
+	struct heap_mem *mem;
+	if(rmem == RT_NULL) {
+		return;
+	}
+	if(((rt_uint8_t *)rmem < (rt_uint8_t*)heap_ptr) ||
+		((rt_uint8_t*)rmem >= (rt_uint8_t*)heap_end)) {
+		return;//illegal addr
+	}
+	mem = (struct heap_mem *)((rt_uint8_t*)rmem - SIZEOF_STRUCT_MEM);
+	rt_sem_take(&heap_sem, RT_WAITING_FOREVER);
+	mem->used = 0;
+	mem->magic = HEAP_MAGIC;
+	if(mem < lfree) {
+		lfree = mem;
+	}
+	plug_holes(mem);
+	rt_sem_release(&heap_sem);
+}
 void rt_system_heap_init(
 	void *begin_addr,
 	void *end_addr

@@ -119,7 +119,27 @@ static rt_err_t _rt_thread_init(
 	return RT_EOK;
 }
 
+rt_err_t rt_thread_sleep(rt_tick_t tick)
+{
+	rt_base_t temp;
+	struct rt_thread *thread;
 
+	temp = rt_hw_interrupt_disable();
+	thread = rt_current_thread;
+	rt_thread_suspend(thread);
+
+	rt_timer_control(&(thread->thread_timer), RT_TIMER_CTRL_SET_TIME, &tick);
+	rt_timer_start(&(thread->thread_timer));
+	rt_hw_interrupt_enable(temp);
+	rt_schedule();
+	return RT_EOK;
+	
+}
+
+rt_err_t rt_thread_delay(rt_tick_t tick)
+{
+	return rt_thread_sleep(tick);
+}
 rt_err_t rt_thread_resume(rt_thread_t thread)
 {
 	rt_base_t temp;

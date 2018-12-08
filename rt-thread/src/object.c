@@ -73,6 +73,24 @@ struct rt_object_information *rt_object_get_information(
 	return RT_NULL;
 }
 
+rt_bool_t rt_object_is_systemobject(rt_object_t object)
+{
+	if(object->type & RT_Object_Class_Static) {
+		return RT_TRUE;
+	} else {
+		return RT_FALSE;
+	}
+}
+
+
+
+void rt_object_detach(rt_object_t object)
+{
+	rt_base_t temp;
+	temp = rt_hw_interrupt_disable();
+	rt_list_remove(&(object->list));
+	rt_hw_interrupt_enable(temp);
+}
 
 void rt_object_init(struct rt_object *object,
 	enum rt_object_class_type type,

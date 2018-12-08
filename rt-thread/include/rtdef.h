@@ -169,9 +169,28 @@ struct rt_object_information {
 	rt_size_t object_size;
 };
 
-#define RT_TIMER_SKIP_LIST_LEVEL 1
 
 //timer
+
+#define RT_TIMER_FLAG_DEACTIVED 0X0
+#define RT_TIMER_FLAG_ACTIVED 0X1
+
+#define RT_TIMER_FLAG_ONE_SHOT  0X0
+#define RT_TIMER_FLAG_PERIODIC	0X2
+
+#define RT_TIMER_FLAG_HARD_TIMER 0X0
+#define RT_TIEMR_FLAG_SOFT_TIMER 0X4
+
+#define RT_TIMER_CTRL_SET_TIME 0X00
+#define RT_TIMER_CTRL_GET_TIME 0X01
+#define RT_TIMER_CTRL_SET_ONESHOT	0X02
+#define RT_TIMER_CTRL_SET_PERIODIC	0X03
+
+
+
+#define RT_TIMER_SKIP_LIST_LEVEL 1
+
+
 struct rt_timer {
 	struct rt_object parent;
 	rt_list_t row[RT_TIMER_SKIP_LIST_LEVEL];

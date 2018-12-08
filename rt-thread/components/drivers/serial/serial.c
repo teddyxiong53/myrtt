@@ -65,7 +65,7 @@ rt_inline int _serial_int_rx(struct rt_serial_device *serial,
 	rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 	while(len) {
 		int ch;
-		rt_base_t level;
+		register rt_base_t level;
 		level = rt_hw_interrupt_disable();
 		if((rx_fifo->get_index == rx_fifo->put_index) && 
 			(rx_fifo->is_full != RT_TRUE)) {
@@ -124,6 +124,24 @@ rt_inline int _serial_int_tx(struct rt_serial_device *serial,
 	return size -length;
 }
 
+rt_inline rt_size_t _serial_poll_tx(
+	struct rt_serial_device *serial,
+	const rt_uint8_t *data, 
+	int length	
+)
+{
+	int size;
+	size = length;
+	while(length) {
+		if(*data == '\n' && (serial->parent.open_flag&RT_DEVICE_FLAG_STREAM)) {
+			serial->ops->putc(serial, '\r');
+		}
+		serial->ops->putc(serial, *data);
+		data++;
+		length --;
+	}
+	return size - length;
+}
 static rt_size_t rt_serial_write(struct rt_device *dev,
 	rt_off_t pos,
 	const void *buffer,
@@ -136,7 +154,8 @@ static rt_size_t rt_serial_write(struct rt_device *dev,
 		return 0;
 	}
 	serial = (struct rt_serial_device *)dev;
-	return _serial_int_tx(serial, buffer, size);
+	//return _serial_int_tx(serial, buffer, size);
+	return _serial_poll_tx(serial, buffer, size);
 }
 
 rt_err_t rt_serial_control(
@@ -180,7 +199,7 @@ void rt_hw_serial_isr(struct rt_serial_device *serial, int event)
 		case RT_SERIAL_EVENT_RX_IND:
 		{
 			int ch = -1;
-			rt_base_t level;
+			register rt_base_t level;
 			struct rt_serial_rx_fifo *rx_fifo;
 			rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_tx;
 			while(1) {

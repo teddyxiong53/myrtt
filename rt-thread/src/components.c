@@ -1,6 +1,8 @@
 #include <rthw.h>
 #include <rtthread.h>
 
+static rt_uint8_t main_stack[2048];
+struct rt_thread main_thread;
 
 static int rti_start()
 {
@@ -27,14 +29,32 @@ static int rti_end()
 INIT_EXPORT(rti_end, "6.end");
 
 
+void main_thread_entry(void *parameter)
+{
+	extern int main();
+	main();
+}
+void rt_application_init()
+{
+	rt_thread_t tid;
+	rt_err_t result;
+	tid = &main_thread;
+	result = rt_thread_init(tid, "main", main_thread_entry, 
+		RT_NULL, main_stack, sizeof(main_stack),10, 50 );
+	rt_thread_startup(tid);
+}
 int rtthread_startup()
 {
 	rt_hw_interrupt_disable();
 	rt_hw_board_init();
 	rt_show_version();
-	while(1) {
-		;
-	}
+	rt_system_timer_init();
+	rt_system_scheduler_init();
+	rt_application_init();
+
+	rt_thread_idle_init();
+	rt_system_scheduler_start();
+
 }
 
 void rt_components_board_init()

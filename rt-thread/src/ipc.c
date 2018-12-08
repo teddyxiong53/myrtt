@@ -25,7 +25,7 @@ rt_err_t rt_sem_init(
 rt_err_t rt_sem_take(rt_sem_t sem, rt_uint32_t time)
 {
 #if 0
-	rt_base_t temp;
+	register rt_base_t temp;
 	temp = rt_hw_interrupt_disable();
 	if(sem->value > 0) {
 		sem->value --;

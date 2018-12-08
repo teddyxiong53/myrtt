@@ -33,6 +33,15 @@ void finsh_set_device(const char *device_name)
 		rt_device_set_rx_indicate(dev, finsh_rx_ind);
 	}
 }
+
+static char finsh_getchar()
+{
+	char ch;
+	while(rt_device_read(shell->device, -1, &ch, 1) != 1) {
+		rt_sem_take(&shell->rx_sem, RT_WAITING_FOREVER);
+	}
+	return ch;
+}
 void finsh_thread_entry(void *parameter)
 {
 	rt_kprintf("finsh_thread_entry\n");
@@ -43,8 +52,23 @@ void finsh_thread_entry(void *parameter)
 		if(console) {
 			finsh_set_device(console->parent.name);
 		}
+		
 	}
 	rt_kprintf(FINSH_PROMPT);
+	while(1) {
+		ch = finsh_getchar();
+		if(ch=='\0') {
+			continue;
+		} else if(ch == '\t') {
+			
+		}
+
+		if(ch == '\r' || ch =='\n') {
+			if(shell->echo_mode) {
+				rt_kprintf(FINSH_PROMPT"\n");
+			}
+		}
+	}
 }
 
 int finsh_system_init()

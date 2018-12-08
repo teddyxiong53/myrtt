@@ -111,4 +111,20 @@ rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos,
 	return 0;
 }
 
+rt_size_t rt_device_read(
+	rt_device_t dev,
+	rt_off_t pos,
+	void *buffer,
+	rt_size_t size
+)
+{
+	if(dev->ref_count == 0) {
+		rt_set_errno(-RT_ERROR);
+		return 0;
+	}
+	if(dev->read != RT_NULL) {
+		return dev->read(dev, pos, buffer, size);
+	}
+	return 0;
+}
 

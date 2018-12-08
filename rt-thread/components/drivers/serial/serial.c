@@ -38,12 +38,7 @@ static rt_err_t rt_serial_open(struct rt_device *dev, rt_uint16_t oflag)
 		serial->ops->control(serial, RT_DEVICE_CTRL_SET_INT, (void *)RT_DEVICE_FLAG_INT_RX);
 	}	
 	if(serial->serial_tx == RT_NULL) {
-		struct rt_serial_tx_fifo *tx_fifo;
-		tx_fifo = rt_malloc(sizeof(struct rt_serial_tx_fifo));
-		rt_completion_init(&(tx_fifo->completion));
-		serial->serial_tx = tx_fifo;
-		dev->open_flag |= RT_DEVICE_FLAG_INT_TX;
-		serial->ops->control(serial, RT_DEVICE_CTRL_SET_INT, (void *)RT_DEVICE_FLAG_INT_TX);
+		//do nothing
 	}
 	return RT_EOK;
 	
@@ -51,6 +46,21 @@ static rt_err_t rt_serial_open(struct rt_device *dev, rt_uint16_t oflag)
 
 static rt_err_t rt_serial_close(struct rt_device *dev)
 {
+	struct rt_serial_device *serial;
+	serial = (struct rt_serial_device *)dev;
+	if(dev->ref_count > 1) {
+		return RT_EOK;
+	}
+	if(dev->open_flag & RT_DEVICE_FLAG_INT_RX) {
+		struct rt_serial_rx_fifo *rx_fifo;
+		rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
+		rt_free(rx_fifo);
+		serial->serial_rx = RT_NULL;
+		dev->open_flag &= ~RT_DEVICE_FLAG_INT_RX;
+		serial->ops->control(serial, RT_DEVICE_CTRL_CLR_INT, (void *)RT_DEVICE_FLAG_INT_RX);
+	}
+	//tx need no process
+	
 	return RT_EOK;
 }
 
@@ -201,7 +211,7 @@ void rt_hw_serial_isr(struct rt_serial_device *serial, int event)
 			int ch = -1;
 			register rt_base_t level;
 			struct rt_serial_rx_fifo *rx_fifo;
-			rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_tx;
+			rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 			while(1) {
 				ch = serial->ops->getc(serial);
 				if(ch==-1) {
@@ -222,6 +232,14 @@ void rt_hw_serial_isr(struct rt_serial_device *serial, int event)
 				}
 				rt_hw_interrupt_enable(level);
 				
+			}
+			if(serial->parent.rx_indicate != RT_NULL) {
+				rt_size_t rx_length;
+				level = rt_hw_interrupt_disable();
+				rx_length = (rx_fifo->put_index >= rx_fifo->get_index)? (rx_fifo->put_index - rx_fifo->get_index):
+                    (serial->config.bufsz - (rx_fifo->get_index - rx_fifo->put_index));
+				rt_hw_interrupt_enable(level);
+				serial->parent.rx_indicate(&serial->parent, rx_length);
 			}
 			break;
 			

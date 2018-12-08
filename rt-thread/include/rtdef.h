@@ -424,8 +424,12 @@ struct rt_device {
 	void *user_data;
 };
 
+
+
 #ifdef __cplusplus
 }
 #endif
+
+#include "rtlibc.h"
 
 #endif

@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <rtthread.h>
 #define TEST_BASIC 0
-#define TEST_SEM  1
+#define TEST_SEM  0
+
+#define TEST_MEM 1
+
 #if TEST_BASIC
 int main(void)
 {
@@ -44,4 +47,28 @@ int main(void)
 	
 }
 
+#endif
+
+#if TEST_MEM
+int main(void)
+{
+	char *p1, *p2, *p3;
+	p1 = rt_malloc(1);
+	p2 = rt_malloc(20);
+	p3 = rt_malloc(21);
+	rt_kprintf("malloc test begin\n");
+	rt_kprintf("p1:%p, p2:%p, p3:%p\n",p1, p2, p3);
+
+	rt_kprintf("now free the pointer\n");
+	
+	rt_free(p1);
+	rt_free(p2);
+	rt_free(p3);
+
+	rt_kprintf("second time malloc");
+	p1 = rt_malloc(1);
+	p2 = rt_malloc(20);
+	p3 = rt_malloc(21);
+	rt_kprintf("p1:%p, p2:%p, p3:%p\n",p1, p2, p3);
+}
 #endif

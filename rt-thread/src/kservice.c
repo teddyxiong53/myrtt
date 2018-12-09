@@ -447,6 +447,15 @@ void *rt_memcpy(void *dst, const void *src, rt_ubase_t count)
 
     return dst; 
 }
+
+rt_int32_t rt_strcmp(const char *cs, const char *ct)
+{
+    while (*cs && *cs == *ct)
+        cs++, ct++;
+
+    return (*cs - *ct);
+}
+
 rt_int32_t rt_snprintf(
 	char *buf,
 	rt_size_t size,

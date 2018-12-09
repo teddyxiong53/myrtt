@@ -334,7 +334,11 @@ struct rt_messagequeue {
 typedef struct rt_messagequeue *rt_mq_t;
 
 struct rt_memheap_item {
-	int a;
+	rt_uint32_t magic;
+	struct rt_memheap *pool_ptr;
+
+	struct rt_memheap_item *next,
+		*prev, *next_free, *prev_free;
 };
 struct rt_memheap {
 	struct rt_object parent;

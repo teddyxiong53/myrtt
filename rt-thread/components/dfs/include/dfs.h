@@ -20,6 +20,11 @@
 #define DFS_PATH_MAX  256
 
 
+#define DFS_FS_FLAG_DEFAULT 0X00
+#define DFS_FS_FLAG_FULLPATH 0X01
+
+
+
 struct statfs {
 	size_t f_bsize;
 	size_t f_blocks;

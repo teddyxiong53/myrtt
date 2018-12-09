@@ -158,7 +158,88 @@ int dfs_mount(
 		return -1;
 	}
 	fullpath = dfs_normalize_path(NULL, path);
+	if(fullpath == NULL) {
+		rt_set_errno(-ENOTDIR);
+		return -1;
+	}
+	//now check if the filesystem is already mounted or not
+	
+	dfs_lock();
+	for(iter=&filesystem_table[0], i=0;
+		iter<&filesystem_table[DFS_FILESYSTEM_MAX];
+		iter++,i++) {
+		if(iter->ops == NULL) {
+			if(fs == NULL) {
+				fs = iter;
+			}
+		} else if(strcmp(iter->path, path)==0){//already mounted this path 
+			rt_set_errno(-EINVAL);
+			goto err1;
+		}
+	}
+	if((fs ==NULL) && (i>=DFS_FILESYSTEM_MAX)) {
+		//not found
+		rt_set_errno(-ENOSPC);
+		goto err1;
+	}
 
-	return RT_EOK;
+	fs->path = fullpath;
+	fs->ops = ops;
+	fs->dev_id = dev_id;
+
+	dfs_unlock();
+	if(dev_id != NULL) {
+		if(rt_device_open(fs->dev_id, RT_DEVICE_OFLAG_RDWR) != RT_EOK) {
+			dfs_lock();
+			memset(fs, 0, sizeof(struct dfs_filesystem));
+			goto err1;
+		}
+	}
+	//now mount 
+	if((*ops)->mount(fs, rwflag, data) < 0) {
+		if(dev_id != NULL) {
+			rt_device_close(fs->dev_id);
+		}
+		dfs_lock();
+		memset(fs, 0, sizeof(struct dfs_filesystem));
+		goto err1;
+	}
+	return 0;
+err1:
+	dfs_unlock();
+	rt_free(fullpath);
+	return -1;
+}
+
+
+int dfs_register(
+	const struct dfs_filesystem_ops *ops
+)
+{
+	int ret = RT_EOK;
+	const struct dfs_filesystem_ops **empty = NULL;
+	const struct dfs_filesystem_ops **iter;
+
+	dfs_lock();
+	for(iter=&filesystem_operation_table[0];
+		iter < &filesystem_operation_table[DFS_FILESYSTEM_MAX];
+		iter ++) {
+		if(*iter == NULL) {
+			if(empty == NULL) {
+				empty = iter;
+			}
+		} else if(strcmp((*iter)->name, ops->name)==0) {
+			ret = -1;
+			break;
+		}
+	}
+	if(empty == NULL) {
+		rt_set_errno(-ENOSPC);
+		ret = -1;
+	} else if(ret == RT_EOK) {
+		*empty = ops;
+	}
+	dfs_unlock();
+	return ret;
 }
 

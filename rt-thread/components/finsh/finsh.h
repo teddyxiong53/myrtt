@@ -25,6 +25,9 @@ struct finsh_syscall {
 			(syscall_func) &name\
 		};
 
+
+#define FINSH_FUNCTION_EXPORT_ALIAS(name, alias, desc) \
+	FINSH_FUNCTION_EXPORT_CMD(name, alias, desc)
 #define MSH_CMD_EXPORT(command ,desc) \
 	FINSH_FUNCTION_EXPORT_CMD(command, __cmd_##command, desc)
 

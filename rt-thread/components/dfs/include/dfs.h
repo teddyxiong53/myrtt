@@ -23,6 +23,17 @@
 #define DFS_FS_FLAG_DEFAULT 0X00
 #define DFS_FS_FLAG_FULLPATH 0X01
 
+//file type
+#define FT_REGULAR 0
+#define FT_SOCKET	1
+#define FT_DIRECTORY 2
+#define FT_USER 	3
+
+//file flag
+#define DFS_F_OPEN 0X01000000
+#define DFS_F_DIRECTORY 0X02000000
+#define DFS_F_EOF 0X04000000
+#define DFS_F_ERR 0X08000000
 
 
 struct statfs {

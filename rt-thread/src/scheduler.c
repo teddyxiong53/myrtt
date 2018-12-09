@@ -14,6 +14,26 @@ rt_uint32_t rt_thread_ready_priority_group;
 rt_list_t rt_thread_defunct;
 
 
+void rt_enter_critical()
+{
+	rt_base_t level;
+	level = rt_hw_interrupt_disable();
+	rt_scheduler_lock_nest++;
+	rt_hw_interrupt_enable(level);
+}
+void rt_exit_critical()
+{
+	rt_base_t level;
+	level = rt_hw_interrupt_disable();
+	rt_scheduler_lock_nest--;
+	if(rt_scheduler_lock_nest <= 0) {
+		rt_scheduler_lock_nest = 0;
+		rt_hw_interrupt_enable(level);
+		rt_schedule();
+	} else {
+		rt_hw_interrupt_enable(level);
+	}
+}
 void rt_schedule_remove_thread(struct rt_thread *thread)
 {
 	rt_base_t temp;
@@ -95,4 +115,6 @@ void rt_system_scheduler_start()
 	rt_hw_context_switch_to((rt_uint32_t)&to_thread->sp);
 	
 }
+
+
 

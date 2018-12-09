@@ -243,3 +243,31 @@ int dfs_register(
 	return ret;
 }
 
+
+struct dfs_filesystem *dfs_filesystem_lookup(const char *path)
+{
+	struct dfs_filesystem *iter; 
+	struct dfs_filesystem *fs =NULL;
+	uint32_t fspath, prefixlen;
+	prefixlen = 0;
+	dfs_lock();
+
+	for(iter=&filesystem_table[0];
+		iter < &filesystem_table[DFS_FILESYSTEM_MAX]; iter++) {
+		if((iter->path == NULL) || (iter->ops == NULL)) {
+			continue;
+		}
+		fspath = strlen(iter->path);
+		if((fspath < prefixlen) ||
+			(strncmp(iter->path, path, fspath) != 0)) {
+			continue;		
+		}
+		if(fspath > 1 && (strlen(path) > fspath) && (path[fspath]!='/')) {
+			continue;
+		}
+		fs = iter;
+		prefixlen = fspath;
+	}
+	dfs_unlock();
+	return fs;
+}
